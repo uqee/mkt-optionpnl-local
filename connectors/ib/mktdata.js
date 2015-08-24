@@ -13,7 +13,7 @@ module.exports = function (ib, _getId) {
 
       // request initial data
       ib.reqMktData(id, task.contract, '', /* snapshot = */ true);
-      queue.concurrency--;
+      queue.concurrency -= 10;
 
       // return unsubscriber func
       callback(null, _unsubscribe.bind(null, id));
@@ -42,6 +42,7 @@ module.exports = function (ib, _getId) {
     function _onSnapshotEnd (id) {
       if (!tasks[id]) return;
       ib.reqMktData(id, tasks[id].contract, '', /* snapshot = */ false);
+      queue.concurrency += 9;
     }
 
     var tasks = {};

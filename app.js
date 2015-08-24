@@ -7,4 +7,5 @@ var server = require('http').createServer(function (req, res) { res.status(200).
 require('./io')(server);
 
 // run server
-server.listen(process.env.PORT || 8080, function () { require('./log').msg('server started'); });
+var log = require('./log');
+server.listen(process.env.PORT || 9999, function () { log.print(log.LVL_INFO, 'started'); });
