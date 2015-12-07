@@ -1,3 +1,4 @@
 .env
+/ib
 /node_modules
 npm-debug.log
