@@ -1,11 +1,11 @@
 'use strict';
 
 // create server
-var server = require('http').createServer(function (req, res) { res.status(200).end(); });
+var server = require('./backend/express');
 
 // bind socket.io
-require('./io')(server);
+require('./backend/io')(server);
 
 // run server
-var log = require('./log');
-server.listen(process.env.PORT || 9999, function () { log.print(log.LVL_INFO, 'started'); });
+var log = require('./backend/log');
+server.listen(process.env.PORT || 9999, function () { log.print(log.LVL_INFO, 'server', 'started'); });

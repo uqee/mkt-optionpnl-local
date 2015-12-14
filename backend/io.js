@@ -1,7 +1,7 @@
 module.exports = function (server) {
   'use strict';
   var io = require('socket.io')(server);
-  var ib = require('./connectors/ib');
+  var ib = require('./api/ib');
   var log = require('./log');
 
   function _requestContract (socket, contract) {
