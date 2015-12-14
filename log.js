@@ -62,10 +62,11 @@ function _contractToString (contract) {
   process.on('uncaughtException', _exit);
 
 module.exports = {
-  print: _print,
-  LVL_ERROR:   LVL_ERROR,
+  LVL_ERROR: LVL_ERROR,
   LVL_WARNING: LVL_WARNING,
-  LVL_INFO:    LVL_INFO,
+  LVL_INFO: LVL_INFO,
   LVL_DETAILS: LVL_DETAILS,
-  LVL_XXL:     LVL_XXL
+  LVL_XXL: LVL_XXL,
+  print: _print,
+  contractToString: _contractToString
 };

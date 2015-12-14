@@ -1,4 +1,4 @@
-module.exports = function (ib, _getId) {
+module.exports = function (ib, _getId, _convertContract) {
   'use strict';
   var async = require('async');
   var log = require('../../log');
@@ -11,7 +11,7 @@ module.exports = function (ib, _getId) {
       log.print(log.LVL_XXL, 'ib', '_reqMktData', '(' + id + ', ' + JSON.stringify(task) + ')');
 
       // save task
-      task.callback = callback;
+      task._callback = callback;
       task.cancel = _cancelMktData.bind(null, id);
       tasks[id] = task;
 
@@ -21,13 +21,12 @@ module.exports = function (ib, _getId) {
 
     function _cancelMktData (id) {
       log.print(log.LVL_XXL, 'ib', '_cancelMktData', '(' + id + ')');
-      log.print(log.LVL_INFO, 'server', 'unsubscribed', null, tasks[id].contract);
 
       // cancel subscription
       ib.cancelMktData(id);
 
       // dequeue
-      tasks[id].callback();
+      tasks[id]._callback();
 
       // cleanup
       delete tasks[id];
@@ -41,10 +40,10 @@ module.exports = function (ib, _getId) {
         // subscribed
         if (!task._snapshot)
           switch (type) {
-            case ib.TICK_TYPE.ASK:      task.callback_data(null, { type: 'a',  value: value }); break;
-            case ib.TICK_TYPE.BID:      task.callback_data(null, { type: 'b',  value: value }); break;
-            case ib.TICK_TYPE.ASK_SIZE: task.callback_data(null, { type: 'as', value: value }); break;
-            case ib.TICK_TYPE.BID_SIZE: task.callback_data(null, { type: 'bs', value: value }); break;
+            case ib.TICK_TYPE.ASK:      task.callback(null, { type: 'a',  value: value }); break;
+            case ib.TICK_TYPE.BID:      task.callback(null, { type: 'b',  value: value }); break;
+            case ib.TICK_TYPE.ASK_SIZE: task.callback(null, { type: 'as', value: value }); break;
+            case ib.TICK_TYPE.BID_SIZE: task.callback(null, { type: 'bs', value: value }); break;
           }
 
         // snapshot
@@ -61,7 +60,7 @@ module.exports = function (ib, _getId) {
 
           // callback if already full
           if (data.a && data.b && data.as && data.bs) {
-            task.callback_done(null, task.data);
+            task.callback(null, task.data);
             task.cancel();
           }
         }
@@ -74,10 +73,10 @@ module.exports = function (ib, _getId) {
         var task = tasks[id];
 
         // expose result
-        task.callback_done(null, task.data);
+        task.callback(null, task.data);
 
         // release queue
-        task.callback();
+        task._callback();
 
         // release memory
         delete tasks[id];
@@ -93,49 +92,50 @@ module.exports = function (ib, _getId) {
 
   // outer
 
-    function _convertContract (contract) {
-
-      if (contract.type === 'stock')
-        return ib.contract.stock(
-          contract.ticker
-        );
-
-      else if (contract.type === 'option')
-        return ib.contract.option(
-          contract.ticker,
-          contract.expiration,
-          contract.strike,
-          contract.right
-        );
+    function _snapshot (contract, callback) {
+      var contractib = _convertContract(contract);
+      if (contractib)
+        queue.push({
+          _snapshot: true,
+          _contractHash: log.contractToString(contract),
+          contract: contractib,
+          data: {},
+          callback: callback
+        });
     }
 
-    function _snapshot (req, res, next) {
-      log.print(log.LVL_INFO, 'client', 'snapshot requested', null, req.app_data.contract);
-      queue.push({
-        _snapshot: true,
-        contract: _convertContract(req.app_data.contract),
-        data: {},
-        callback_done: function (err, data) {
-          log.print(log.LVL_INFO, 'server', 'snapshot sent', JSON.stringify(data), req.app_data.contract);
-          req.app_data.result = data;
-          next(err);
-        }
-      });
+    function _subscribe (contract, callback) {
+      var contractib = _convertContract(contract);
+      if (contractib)
+        queue.push({
+          _snapshot: false,
+          _contractHash: log.contractToString(contract),
+          contract: contractib,
+          //data: {},
+          callback: callback
+        });
     }
 
-    function _subscribe (contract, callback_init, callback_data) {
-      log.print(log.LVL_INFO, 'client', 'subscribe requested', null, contract);
-      queue.push({
-        _snapshot: false,
-        contract: _convertContract(contract),
-        //data: {},
-        callback_init: callback_init,
-        callback_data: callback_data
-      });
+    function _unsubscribe (contract) {
+      var contractib = _convertContract(contract);
+      if (contractib) {
+        var contractHash = log.contractToString(contract);
+        for (var id in tasks)
+          if (tasks.hasOwnProperty(id) && tasks[id]._contractHash === contractHash)
+            return tasks[id].cancel();
+      }
+    }
+
+    function _cancelall () {
+      for (var id in tasks)
+        if (tasks.hasOwnProperty(id))
+          tasks[id].cancel();
     }
 
     return {
       snapshot: _snapshot,
-      subscribe: _subscribe
+      subscribe: _subscribe,
+      unsubscribe: _unsubscribe,
+      cancelall: _cancelall
     };
 };
