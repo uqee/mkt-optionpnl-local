@@ -126,7 +126,7 @@ module.exports = function (ib, _getId, _convertContract) {
       }
     }
 
-    function _cancelall () {
+    function _cancel () {
       for (var id in tasks)
         if (tasks.hasOwnProperty(id))
           tasks[id].cancel();
@@ -136,6 +136,6 @@ module.exports = function (ib, _getId, _convertContract) {
       snapshot: _snapshot,
       subscribe: _subscribe,
       unsubscribe: _unsubscribe,
-      cancelall: _cancelall
+      cancel: _cancel
     };
 };

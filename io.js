@@ -33,9 +33,9 @@ module.exports = function (server) {
       ib.mktdata.unsubscribe(msg.contract);
     });
 
-    socket.on('/ib/cancelall', function () {
+    socket.on('/ib/cancel', function () {
       log.print(log.LVL_DETAILS, 'client #' + socket.id, '/ib/cancelall');
-      ib.mktdata.cancelall();
+      ib.mktdata.cancel();
     });
   });
 };
