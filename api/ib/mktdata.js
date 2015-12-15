@@ -52,10 +52,10 @@ module.exports = function (ib, _getId, _convertContract) {
 
           // save
           switch (type) {
-            case ib.TICK_TYPE.ASK:      data.a  = value; break;
-            case ib.TICK_TYPE.BID:      data.b  = value; break;
-            case ib.TICK_TYPE.ASK_SIZE: data.as = value; break;
-            case ib.TICK_TYPE.BID_SIZE: data.bs = value; break;
+            case ib.TICK_TYPE.ASK:      data.a  = (value > 0) ? value : null; break;
+            case ib.TICK_TYPE.BID:      data.b  = (value > 0) ? value : null; break;
+            case ib.TICK_TYPE.ASK_SIZE: data.as = (value > 0) ? value : null; break;
+            case ib.TICK_TYPE.BID_SIZE: data.bs = (value > 0) ? value : null; break;
           }
 
           // callback if already full
