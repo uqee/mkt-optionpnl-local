@@ -1,4 +1,4 @@
-module.exports = function (ib, _getId) {
+module.exports = function (ib, _connected, _getId) {
   'use strict';
 
   // inner

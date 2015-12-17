@@ -1,4 +1,4 @@
-module.exports = function (ib, _getId, _convertContract) {
+module.exports = function (ib, _connected, _getId, _convertContract) {
   'use strict';
   var async = require('async');
   var log = require('../../log');
@@ -93,27 +93,33 @@ module.exports = function (ib, _getId, _convertContract) {
   // outer
 
     function _snapshot (contract, callback) {
-      var contractib = _convertContract(contract);
-      if (contractib)
-        queue.push({
-          _snapshot: true,
-          _contractHash: log.contractToString(contract),
-          contract: contractib,
-          data: {},
-          callback: callback
-        });
+      if (!_connected()) callback('no connection');
+      else {      
+        var contractib = _convertContract(contract);
+        if (contractib)
+          queue.push({
+            _snapshot: true,
+            _contractHash: log.contractToString(contract),
+            contract: contractib,
+            data: {},
+            callback: callback
+          });
+      }
     }
 
     function _subscribe (contract, callback) {
-      var contractib = _convertContract(contract);
-      if (contractib)
-        queue.push({
-          _snapshot: false,
-          _contractHash: log.contractToString(contract),
-          contract: contractib,
-          //data: {},
-          callback: callback
-        });
+      if (!_connected()) callback('no connection');
+      else {      
+        var contractib = _convertContract(contract);
+        if (contractib)
+          queue.push({
+            _snapshot: false,
+            _contractHash: log.contractToString(contract),
+            contract: contractib,
+            //data: {},
+            callback: callback
+          });
+      }
     }
 
     function _unsubscribe (contract) {
