@@ -9,7 +9,7 @@ module.exports = function (server) {
 
     socket.on('disconnect', function () {
       log.print(log.LVL_DETAILS, 'client #' + socket.id, 'disconnected');
-      ib.mktdata.cancelall();
+      ib.mktdata.cancel();
     });
 
     socket.on('/ib/snapshot', function (msg) {
@@ -34,7 +34,7 @@ module.exports = function (server) {
     });
 
     socket.on('/ib/cancel', function () {
-      log.print(log.LVL_DETAILS, 'client #' + socket.id, '/ib/cancelall');
+      log.print(log.LVL_DETAILS, 'client #' + socket.id, '/ib/cancel');
       ib.mktdata.cancel();
     });
   });
