@@ -60,8 +60,8 @@ var log = require('../../log');
       ticker = contract.ticker.toUpperCase();
 
     var expiration;
-    if (/^201[0-9]{5}$/.test(contract.expiration))
-      expiration = contract.expiration;
+    if (/^201[0-9]{5}$/.test('' + contract.expiration))
+      expiration = '' + contract.expiration;
 
     var strike;
     if (/^\d+(\.\d{1,2})?$/.test(contract.strike))
