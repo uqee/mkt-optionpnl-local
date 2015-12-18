@@ -25,7 +25,7 @@ function _contractToString (contract) {
   else {
     var result = (contract.ticker || contract.symbol);
     if (contract.expiration || contract.expiry) result += '-' + (contract.expiration || contract.expiry);
-    if (contract.right) result += '-' + contract.right;
+    if (contract.right) result += '-' + contract.right.toUpperCase();
     if (contract.strike) result += '-' + contract.strike;
     return result;
   }
