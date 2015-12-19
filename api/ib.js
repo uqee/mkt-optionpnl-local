@@ -115,7 +115,7 @@ var ib = new (require('ib'))({
   // inner
 
     function reqMktData (contract, snapshot, id) {
-      log.print(log.LVL_XXL, 'ib', '_reqMktData', '(' + id + ', ' + contract + ', ' + snapshot + ')');
+      log.print(log.LVL_XXL, 'ib', '_reqMktData', '(' + id + ', ' + JSON.stringify(contract) + ', ' + snapshot + ')');
       ib.reqMktData(id, contract, '', snapshot);
     }
 
@@ -138,41 +138,68 @@ var ib = new (require('ib'))({
         switch (task.name) {
 
           case 'snapshot':
-            var data = task.data;
-
-            // save
             switch (type) {
-              case ib.TICK_TYPE.ASK:      data.a  = value; break;
-              case ib.TICK_TYPE.BID:      data.b  = value; break;
-              case ib.TICK_TYPE.ASK_SIZE: data.as = value; break;
-              case ib.TICK_TYPE.BID_SIZE: data.bs = value; break;
+              case ib.TICK_TYPE.ASK:      task.data.ask.price  = value; break;
+              case ib.TICK_TYPE.BID:      task.data.bid.price  = value; break;
+              case ib.TICK_TYPE.ASK_SIZE: task.data.ask.size   = value; break;
+              case ib.TICK_TYPE.BID_SIZE: task.data.bid.size   = value; break;
+              case ib.TICK_TYPE.CLOSE:    task.data.last.price = value; break;
             }
-
-            // done if got enough info
-            /*
-            if (data.a && data.b && data.as && data.bs) {
-
-              //
-              if (data.a  <= 0) data.a  = null;
-              if (data.b  <= 0) data.b  = null;
-              if (data.as <= 0) data.as = null;
-              if (data.bs <= 0) data.bs = null;
-              task.active = false;
-              task.end(null, data);
-
-              // release the queue
-              task.callback();
-            }
-            */
-
             break;
 
           case 'subscribe':
             switch (type) {
-              case ib.TICK_TYPE.ASK:      task.progress(null, { type: 'a',  value: (value > 0 ? value : null) }); break;
-              case ib.TICK_TYPE.BID:      task.progress(null, { type: 'b',  value: (value > 0 ? value : null) }); break;
-              case ib.TICK_TYPE.ASK_SIZE: task.progress(null, { type: 'as', value: (value > 0 ? value : null) }); break;
-              case ib.TICK_TYPE.BID_SIZE: task.progress(null, { type: 'bs', value: (value > 0 ? value : null) }); break;
+              case ib.TICK_TYPE.ASK:      task.progress(null, { type: 'ask.price', value: (value > 0 ? value : null) }); break;
+              case ib.TICK_TYPE.BID:      task.progress(null, { type: 'bid.price', value: (value > 0 ? value : null) }); break;
+              case ib.TICK_TYPE.ASK_SIZE: task.progress(null, { type: 'ask.size',  value: (value > 0 ? value : null) }); break;
+              case ib.TICK_TYPE.BID_SIZE: task.progress(null, { type: 'bid.size',  value: (value > 0 ? value : null) }); break;
+            }
+            break;
+
+        }
+      }
+    }
+
+    function onTickOptionComputation (id, type, iv, delta, optPrice, pvDividend, gamma, vega, theta, undPrice) {
+      log.print(log.LVL_XXL, 'ib', '_onTickOptionComputation', '(' + id + ', ' + type + ', ' + iv + ', ' + delta + ', ' + optPrice + ', ' + pvDividend + ', ' + gamma + ', ' + vega + ', ' + theta + ', ' + undPrice + ')');
+      var task = reqTasks[id];
+      if (task) {
+        switch (task.name) {
+
+          case 'snapshot':
+            var dest;
+            switch (type) {
+              case ib.TICK_TYPE.BID_OPTION:   dest = task.data.bid;   break;
+              case ib.TICK_TYPE.ASK_OPTION:   dest = task.data.ask;   break;
+              case ib.TICK_TYPE.LAST_OPTION:  dest = task.data.last;  break;
+              case ib.TICK_TYPE.MODEL_OPTION: dest = task.data.model; break;
+            }
+            dest.undprice = undPrice;
+            dest.price = optPrice;
+            dest.iv = iv;
+            dest.delta = delta;
+            dest.gamma = gamma;
+            dest.theta = theta;
+            dest.vega = vega;
+            dest.div = pvDividend;
+            break;
+
+          case 'subscribe':
+            var src = {
+              undprice: undPrice,
+              price: optPrice,
+              iv: iv,
+              delta: delta,
+              gamma: gamma,
+              theta: theta,
+              vega: vega,
+              div: pvDividend
+            };
+            switch (type) {
+              case ib.TICK_TYPE.BID_OPTION:   task.progress(null, { type: 'bid',   value: src }); break;
+              case ib.TICK_TYPE.ASK_OPTION:   task.progress(null, { type: 'ask',   value: src }); break;
+              case ib.TICK_TYPE.LAST_OPTION:  task.progress(null, { type: 'last',  value: src }); break;
+              case ib.TICK_TYPE.MODEL_OPTION: task.progress(null, { type: 'model', value: src }); break;
             }
             break;
 
@@ -187,10 +214,14 @@ var ib = new (require('ib'))({
         var data = task.data;
 
         //
-        if (data.a  <= 0) data.a  = null;
-        if (data.b  <= 0) data.b  = null;
-        if (data.as <= 0) data.as = null;
-        if (data.bs <= 0) data.bs = null;
+        if (data.ask.price   <= 0) delete data.ask.price;
+        if (data.ask.size    <= 0) delete data.ask.size;
+        if (data.bid.price   <= 0) delete data.bid.price;
+        if (data.bid.size    <= 0) delete data.bid.size;
+        if (data.last.price  <= 0) delete data.last.price;
+        if (data.last.size   <= 0) delete data.last.size;
+        if (data.model.price <= 0) delete data.model.price;
+        if (data.model.size  <= 0) delete data.model.size;
         task.active = false;
         task.end(null, data);
 
@@ -201,6 +232,7 @@ var ib = new (require('ib'))({
 
     ib.on('tickPrice', onTickData);
     ib.on('tickSize',  onTickData);
+    ib.on('tickOptionComputation', onTickOptionComputation);
     ib.on('tickSnapshotEnd', onSnapshotEnd);
 
   // outer
@@ -216,10 +248,26 @@ var ib = new (require('ib'))({
           start: reqMktData.bind(/* this */ null, contract, /* snapshot */ true),
           end: callback,
           data: {
-            // b
-            // bs
-            // a
-            // as
+            bid: {
+              // undprice
+              // price
+              // size
+              // iv
+              // delta
+              // gamma
+              // theta
+              // vega
+              // div
+            },
+            ask: {
+              // ...
+            },
+            last: {
+              // ...
+            },
+            model: {
+              // ...
+            }
           }
         });
     }
