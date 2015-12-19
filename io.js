@@ -9,12 +9,12 @@ module.exports = function (server) {
 
     socket.on('disconnect', function () {
       log.print(log.LVL_DETAILS, 'client #' + socket.id, 'disconnected');
-      ib.mktdata.cancel();
+      ib.cancel();
     });
 
     socket.on('/ib/snapshot', function (msg) {
       log.print(log.LVL_DETAILS, 'client #' + socket.id, '/ib/snapshot', null, msg.contract);
-      ib.mktdata.snapshot(msg.contract, function (err, res) {
+      ib.snapshot(msg.contract, function (err, res) {
         if (err) log.print(log.LVL_ERROR, 'server', '/ib/snapshot', err, msg.contract);
         else log.print(log.LVL_DETAILS, 'server', '/ib/snapshot', JSON.stringify(res), msg.contract);
         socket.emit('/ib/snapshot', { req: msg, res: res });
@@ -23,7 +23,7 @@ module.exports = function (server) {
 
     socket.on('/ib/subscribe', function (msg) {
       log.print(log.LVL_DETAILS, 'client #' + socket.id, '/ib/subscribe', null, msg.contract);
-      ib.mktdata.subscribe(msg.contract, function (err, res) {
+      ib.subscribe(msg.contract, function (err, res) {
         if (err) log.print(log.LVL_ERROR, 'server', '/ib/subscribe', err, msg.contract);
         else log.print(log.LVL_DETAILS, 'server', '/ib/subscribe', JSON.stringify(res), msg.contract);
         socket.emit('/ib/subscribe', { req: msg, res: res });
@@ -32,12 +32,12 @@ module.exports = function (server) {
 
     socket.on('/ib/unsubscribe', function (msg) {
       log.print(log.LVL_DETAILS, 'client #' + socket.id, '/ib/unsubscribe', null, msg.contract);
-      ib.mktdata.unsubscribe(msg.contract);
+      ib.unsubscribe(msg.contract);
     });
 
     socket.on('/ib/cancel', function () {
       log.print(log.LVL_DETAILS, 'client #' + socket.id, '/ib/cancel');
-      ib.mktdata.cancel();
+      ib.cancel();
     });
   });
 };

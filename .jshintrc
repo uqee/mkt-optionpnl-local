@@ -31,7 +31,7 @@
   "immed": true,
   "indent": 2,
   "latedef": true,
-  "maxcomplexity": 16,
+  "maxcomplexity": 21,
   "newcap": true,
   "noarg": true,
   "nonew": true,

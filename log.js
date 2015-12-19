@@ -7,7 +7,8 @@ var LVL_WARNING = 1;
 var LVL_INFO = 2;
 var LVL_DETAILS = 3;
 var LVL_XXL = 4;
-var LVL = Math.round(process.env.LOG_LEVEL || LVL_XXL);
+var LVL_DEBUG = 5;
+var LVL = Math.round(process.env.LOG_LEVEL || LVL_INFO);
 
 function _timeToString (level) {
   var now = ((new Date(Date.now())).toTimeString()).substr(0, 8);
@@ -67,6 +68,7 @@ module.exports = {
   LVL_INFO: LVL_INFO,
   LVL_DETAILS: LVL_DETAILS,
   LVL_XXL: LVL_XXL,
+  LVL_DEBUG: LVL_DEBUG,
   print: _print,
   contractToString: _contractToString
 };
