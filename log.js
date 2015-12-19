@@ -14,10 +14,11 @@ function _timeToString (level) {
   var now = ((new Date(Date.now())).toTimeString()).substr(0, 8);
   switch (level) {
     case LVL_ERROR:   return colors.red(now);
-    case LVL_WARNING: return colors.magenta(now);
-    case LVL_INFO:    return colors.yellow(now);
+    case LVL_WARNING: return colors.yellow(now);
+    case LVL_INFO:    return colors.blue(now);
     case LVL_DETAILS: return colors.cyan(now);
     case LVL_XXL:     return colors.gray(now);
+    case LVL_DEBUG:   return colors.white(now);
   }
 }
 
