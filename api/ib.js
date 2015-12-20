@@ -174,7 +174,7 @@ var ib = new (require('ib'))({
               case ib.TICK_TYPE.LAST_OPTION:  dest = task.data.last;  break;
               case ib.TICK_TYPE.MODEL_OPTION: dest = task.data.model; break;
             }
-            dest.undprice = undPrice;
+            task.data.undprice = undPrice;
             dest.price = optPrice;
             dest.iv = iv;
             dest.delta = delta;
