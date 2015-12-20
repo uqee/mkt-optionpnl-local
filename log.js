@@ -8,7 +8,7 @@ var LVL_INFO = 2;
 var LVL_DETAILS = 3;
 var LVL_XXL = 4;
 var LVL_DEBUG = 5;
-var LVL = Math.round(process.env.LOG_LEVEL || LVL_INFO);
+var LVL = Math.round(process.env.LOG_LEVEL || LVL_DETAILS);
 
 function _timeToString (level) {
   var now = ((new Date(Date.now())).toTimeString()).substr(0, 8);
