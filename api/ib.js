@@ -154,7 +154,7 @@ var ib = new (require('ib'))({
 
             // if subscribed, send current state immediately
             if (task.name === 'subscribe')
-              task.process(null, task.data);
+              task.progress(null, task.data);
 
             break;
         }
@@ -189,7 +189,7 @@ var ib = new (require('ib'))({
 
             // if subscribed, send current state immediately
             if (task.name === 'subscribe')
-              task.process(null, task.data);
+              task.progress(null, task.data);
 
             break;
         }
