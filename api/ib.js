@@ -87,6 +87,9 @@ var ib = new (require('ib'))({
       task.id = reqTasks.length;
       reqTasks.push(task);
       task.start(task.id);
+
+      //
+      if (task.name === 'subscribe') task.end(null, task.id);
     }
   }, /* REQUEST_CONCURRENCY */ 100);
 
@@ -153,8 +156,7 @@ var ib = new (require('ib'))({
             }
 
             // if subscribed, send current state immediately
-            if (task.name === 'subscribe')
-              task.progress(null, task.data);
+            if (task.name === 'subscribe') task.progress(task.data);
 
             break;
         }
@@ -188,8 +190,7 @@ var ib = new (require('ib'))({
             dest.div = pvDividend;
 
             // if subscribed, send current state immediately
-            if (task.name === 'subscribe')
-              task.progress(null, task.data);
+            if (task.name === 'subscribe') task.progress(task.data);
 
             break;
         }
@@ -250,7 +251,7 @@ var ib = new (require('ib'))({
         });
     }
 
-    function subscribe (_contract, callback) {
+    function subscribe (_contract, callback, progress) {
       var contract = inContract(_contract);
       if (contract)
         reqQueue.push({
@@ -259,7 +260,8 @@ var ib = new (require('ib'))({
           contract: contract,
           contractHash: log.contractToString(contract),
           start: reqMktData.bind(/* this */ null, contract, /* snapshot */ false),
-          progress: callback,
+          end: callback,
+          progress: progress,
           data: {
             bid: {
               // undprice
@@ -285,17 +287,11 @@ var ib = new (require('ib'))({
         });
     }
 
-    function unsubscribe (_contract) {
-      var contract = inContract(_contract);
-      if (contract) {
-        var contractHash = log.contractToString(contract);
-        var id = reqTasks.length;
-        var task;
-        while (--id >= 0) {
-          task = reqTasks[id];
-          if (task.active && task.name === 'subscribe' && task.contractHash === contractHash)
-            cancelMktData(id);
-        }
+    function unsubscribe (_id) {
+      var task = reqTasks[_id];
+      if (task.active && task.name === 'subscribe') {
+        task.active = false;
+        cancelMktData(_id);
       }
     }
 
@@ -304,8 +300,10 @@ var ib = new (require('ib'))({
       var task;
       while (--id >= 0) {
         task = reqTasks[id];
-        if (task.active && task.name === 'subscribe')
+        if (task.active && task.name === 'subscribe') {
+          task.active = false;
           cancelMktData(id);
+        }
       }
     }
 
