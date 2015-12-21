@@ -117,6 +117,11 @@ var ib = new (require('ib'))({
 
   // inner
 
+    function _valid (value) {
+
+      return (value > 0 && value < 1e6);
+    }
+
     function reqMktData (contract, snapshot, id) {
       log.print(log.LVL_XXL, 'ib', '_reqMktData', '(' + id + ', ' + JSON.stringify(contract) + ', ' + snapshot + ')');
       ib.reqMktData(id, contract, '', snapshot);
@@ -137,7 +142,7 @@ var ib = new (require('ib'))({
     function onTickData (id, type, value) {
       log.print(log.LVL_XXL, 'ib', '_onTickData', '(' + id + ', ' + type + ', ' + value + ')');
       var task = reqTasks[id];
-      if (task && value > 0) {
+      if (task && _valid(value)) {
         switch (task.name) {
 
           case 'snapshot':
@@ -180,14 +185,14 @@ var ib = new (require('ib'))({
               case ib.TICK_TYPE.LAST_OPTION:  dest = task.data.last;  break;
               case ib.TICK_TYPE.MODEL_OPTION: dest = task.data.model; break;
             }
-            dest.undprice = undPrice;
-            dest.price = optPrice;
-            dest.iv = iv;
-            dest.delta = delta;
-            dest.gamma = gamma;
-            dest.theta = theta;
-            dest.vega = vega;
-            dest.div = pvDividend;
+            if (_valid(undPrice))   dest.undprice = undPrice;
+            if (_valid(optPrice))   dest.price = optPrice;
+            if (_valid(iv))         dest.iv = iv;
+            if (_valid(delta))      dest.delta = delta;
+            if (_valid(gamma))      dest.gamma = gamma;
+            if (_valid(theta))      dest.theta = theta;
+            if (_valid(vega))       dest.vega = vega;
+            if (_valid(pvDividend)) dest.div = pvDividend;
 
             // if subscribed, send current state immediately
             if (task.name === 'subscribe') task.progress(task.data);
