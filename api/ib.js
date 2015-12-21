@@ -222,6 +222,7 @@ var ib = new (require('ib'))({
         if (data.last.size   <= 0) delete data.last.size;
         if (data.model.price <= 0) delete data.model.price;
         if (data.model.size  <= 0) delete data.model.size;
+        if (data.undprice <= 0 || data.undprice > 1e6) delete data.undprice;
         task.active = false;
         task.end(null, data);
 
