@@ -134,28 +134,29 @@ var ib = new (require('ib'))({
     function onTickData (id, type, value) {
       log.print(log.LVL_XXL, 'ib', '_onTickData', '(' + id + ', ' + type + ', ' + value + ')');
       var task = reqTasks[id];
-      if (task) {
+      if (task && value > 0) {
         switch (task.name) {
 
           case 'snapshot':
-            switch (type) {
-              case ib.TICK_TYPE.ASK:      task.data.ask.price  = value; break;
-              case ib.TICK_TYPE.BID:      task.data.bid.price  = value; break;
-              case ib.TICK_TYPE.ASK_SIZE: task.data.ask.size   = value; break;
-              case ib.TICK_TYPE.BID_SIZE: task.data.bid.size   = value; break;
-              case ib.TICK_TYPE.CLOSE:    task.data.last.price = value; break;
-            }
-            break;
-
           case 'subscribe':
-            switch (type) {
-              case ib.TICK_TYPE.ASK:      task.progress(null, { type: 'ask.price', value: (value > 0 ? value : null) }); break;
-              case ib.TICK_TYPE.BID:      task.progress(null, { type: 'bid.price', value: (value > 0 ? value : null) }); break;
-              case ib.TICK_TYPE.ASK_SIZE: task.progress(null, { type: 'ask.size',  value: (value > 0 ? value : null) }); break;
-              case ib.TICK_TYPE.BID_SIZE: task.progress(null, { type: 'bid.size',  value: (value > 0 ? value : null) }); break;
-            }
-            break;
 
+            // append data
+            switch (type) {
+              case ib.TICK_TYPE.ASK:       task.data.ask.price  = value; break;
+              case ib.TICK_TYPE.ASK_SIZE:  task.data.ask.size   = value; break;
+              case ib.TICK_TYPE.BID:       task.data.bid.price  = value; break;
+              case ib.TICK_TYPE.BID_SIZE:  task.data.bid.size   = value; break;
+              case ib.TICK_TYPE.LAST:      task.data.last.price = value; break;
+              case ib.TICK_TYPE.LAST_SIZE: task.data.last.size  = value; break;
+              case ib.TICK_TYPE.CLOSE:     if (!task.data.last.price) task.data.last.price = value; break;
+              case ib.TICK_TYPE.VOLUME:    if (!task.data.last.size)  task.data.last.size  = value; break;
+            }
+
+            // if subscribed, send current state immediately
+            if (task.name === 'subscribe')
+              task.process(null, task.data);
+
+            break;
         }
       }
     }
@@ -167,6 +168,9 @@ var ib = new (require('ib'))({
         switch (task.name) {
 
           case 'snapshot':
+          case 'subscribe':
+
+            // append data
             var dest;
             switch (type) {
               case ib.TICK_TYPE.BID_OPTION:   dest = task.data.bid;   break;
@@ -174,7 +178,7 @@ var ib = new (require('ib'))({
               case ib.TICK_TYPE.LAST_OPTION:  dest = task.data.last;  break;
               case ib.TICK_TYPE.MODEL_OPTION: dest = task.data.model; break;
             }
-            task.data.undprice = undPrice;
+            dest.undprice = undPrice;
             dest.price = optPrice;
             dest.iv = iv;
             dest.delta = delta;
@@ -182,27 +186,12 @@ var ib = new (require('ib'))({
             dest.theta = theta;
             dest.vega = vega;
             dest.div = pvDividend;
-            break;
 
-          case 'subscribe':
-            var src = {
-              undprice: undPrice,
-              price: optPrice,
-              iv: iv,
-              delta: delta,
-              gamma: gamma,
-              theta: theta,
-              vega: vega,
-              div: pvDividend
-            };
-            switch (type) {
-              case ib.TICK_TYPE.BID_OPTION:   task.progress(null, { type: 'bid',   value: src }); break;
-              case ib.TICK_TYPE.ASK_OPTION:   task.progress(null, { type: 'ask',   value: src }); break;
-              case ib.TICK_TYPE.LAST_OPTION:  task.progress(null, { type: 'last',  value: src }); break;
-              case ib.TICK_TYPE.MODEL_OPTION: task.progress(null, { type: 'model', value: src }); break;
-            }
-            break;
+            // if subscribed, send current state immediately
+            if (task.name === 'subscribe')
+              task.process(null, task.data);
 
+            break;
         }
       }
     }
@@ -211,20 +200,8 @@ var ib = new (require('ib'))({
       log.print(log.LVL_XXL, 'ib', '_onSnapshotEnd', '(' + id + ')');
       var task = reqTasks[id];
       if (task) {
-        var data = task.data;
-
-        //
-        if (data.ask.price   <= 0) delete data.ask.price;
-        if (data.ask.size    <= 0) delete data.ask.size;
-        if (data.bid.price   <= 0) delete data.bid.price;
-        if (data.bid.size    <= 0) delete data.bid.size;
-        if (data.last.price  <= 0) delete data.last.price;
-        if (data.last.size   <= 0) delete data.last.size;
-        if (data.model.price <= 0) delete data.model.price;
-        if (data.model.size  <= 0) delete data.model.size;
-        if (data.undprice <= 0 || data.undprice > 1e6) delete data.undprice;
         task.active = false;
-        task.end(null, data);
+        task.end(null, task.data);
 
         // release the queue
         task.callback();
@@ -282,7 +259,29 @@ var ib = new (require('ib'))({
           contract: contract,
           contractHash: log.contractToString(contract),
           start: reqMktData.bind(/* this */ null, contract, /* snapshot */ false),
-          progress: callback
+          progress: callback,
+          data: {
+            bid: {
+              // undprice
+              // price
+              // size
+              // iv
+              // delta
+              // gamma
+              // theta
+              // vega
+              // div
+            },
+            ask: {
+              // ...
+            },
+            last: {
+              // ...
+            },
+            model: {
+              // ...
+            }
+          }
         });
     }
 
