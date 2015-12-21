@@ -16,4 +16,4 @@ This application provides realtime quotes from your Interactive Brokers terminal
 
 ### Parameters
 
-Quotes server starts at `localhost:9999`, please make sure this port is available. Additional startup parameters can be found in the [`.env`](https://github.com/uqee/mkt-optionpnl-local/blob/master/.env) file. To alter them all at once, you may launch the app with [`foreman`](http://github.com/ddollar/foreman) (i.e. `foreman run --env .env npm start`) or just set every environment variable one at a time with `export NAME=value` command (e.g. `export LOG_LEVEL=5`) and run the app afterwards.
+Quotes server starts at `localhost:9999`, please make sure this port is available. Additional startup parameters can be found in the [`.env`](https://github.com/uqee/mkt-optionpnl-local/blob/master/.env) file. To alter them all at once, you may launch the app with [`foreman`](http://github.com/ddollar/foreman) (i.e. `foreman run --env .env npm start`) or just set every environment variable one at a time with `export NAME=value` command (e.g. `export LOG_LEVEL=5`) and run the app afterwards (e.g. `export LOG_LEVEL=4; npm start;`).
