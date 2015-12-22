@@ -100,10 +100,19 @@ var ib = new (require('ib'))({
   
   ib.on('error', function (err, data) {
     var msg = ('' + err).substring(7 /* removes 'Error: ' */);
-    var lvl = (data.code >= 2000 ? log.LVL_XXL : (data.code >= 1000 ? log.LVL_WARNING : log.LVL_ERROR));
+    var lvl = (data ?
+      (data.code >= 2000 ?
+        log.LVL_XXL :
+        (data.code >= 1000 ?
+          log.LVL_WARNING :
+          log.LVL_ERROR
+        )
+      ) :
+      log.LVL_ERROR
+    );
     log.print(lvl, 'ib', msg, JSON.stringify(data));
 
-    var id = data.id;
+    var id = data ? data.id : null;
     if (id >= 0) {
       var task = reqTasks[id];
       if (task) {
