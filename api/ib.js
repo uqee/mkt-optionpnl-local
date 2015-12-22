@@ -128,7 +128,7 @@ var ib = new (require('ib'))({
 
     function _valid (value) {
 
-      return (value > 0 && value < 1e6);
+      return (value > -1e4 && value < 1e4);
     }
 
     function reqMktData (contract, snapshot, id) {
@@ -151,7 +151,7 @@ var ib = new (require('ib'))({
     function onTickData (id, type, value) {
       log.print(log.LVL_XXL, 'ib', '_onTickData', '(' + id + ', ' + type + ', ' + value + ')');
       var task = reqTasks[id];
-      if (task && _valid(value)) {
+      if (task && value > 0 && _valid(value)) {
         switch (task.name) {
 
           case 'snapshot':
