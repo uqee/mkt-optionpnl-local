@@ -195,7 +195,7 @@ var ib = new (require('ib'))({
             }
             if (_valid(undPrice))   dest.undprice = undPrice;
             if (_valid(optPrice))   dest.price = optPrice;
-            if (_valid(iv))         dest.iv = iv;
+            if (_valid(iv))         dest.iv = iv * 100;
             if (_valid(delta))      dest.delta = delta;
             if (_valid(gamma))      dest.gamma = gamma;
             if (_valid(theta))      dest.theta = theta;
