@@ -1,3 +1,5 @@
 /exec
 /node_modules
+.stderr
+.stdout
 npm-debug.log
