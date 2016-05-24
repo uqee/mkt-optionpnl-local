@@ -1,6 +1,6 @@
 {
   "name": "mkt-optionpnl-local",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": false,
   "repository": {
     "type": "git",
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node app.js",
-    "server.start": "foreman run --env .env node app.js >.stdout 2>.stderr &",
+    "server.start": "foreman run --env .env node app.js",
+    "server.start:bg": "npm run-script server.start >.stdout 2>.stderr &",
     "server.stop": "pkill -f 'node app.js'",
     "server.debug": "foreman run --env .env nodemon --debug app.js"
   },
