@@ -20,7 +20,8 @@
     "require": false,
     "console": false,
     "process": false,
-    "__dirname": false
+    "__dirname": false,
+    "JSON": false
   },
 
   // enforcing options
