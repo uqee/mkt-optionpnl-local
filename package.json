@@ -14,8 +14,8 @@
   "dependencies": {
     "async": "^1.5.2",
     "colors": "^1.1.2",
-    "ib": "^0.1.9",
-    "socket.io": "^1.4.6",
+    "ib": "^0.1.12",
+    "socket.io": "^1.4.8",
     "supertest": "^1.2.0"
   },
   "devDependencies": {}
