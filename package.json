@@ -1,6 +1,6 @@
 {
   "name": "mkt-optionpnl-local",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "private": false,
   "license" : "MIT",
   "repository": {
@@ -8,17 +8,14 @@
     "url": "https://github.com/uqee/mkt-optionpnl-local.git"
   },
   "scripts": {
-    "start": "node app.js",
-    "server.start": "foreman run --env .env node app.js",
-    "server.start:bg": "npm run-script server.start >.stdout 2>.stderr &",
-    "server.stop": "pkill -f 'node app.js'",
-    "server.debug": "foreman run --env .env nodemon --debug app.js"
+    "start": "node index.js",
+    "dev": "nodemon --debug index.js"
   },
   "dependencies": {
     "async": "^1.5.2",
     "colors": "^1.1.2",
-    "ib": "^0.1.9",
-    "socket.io": "^1.4.6",
+    "ib": "^0.1.12",
+    "socket.io": "^1.4.8",
     "supertest": "^1.2.0"
   },
   "devDependencies": {}
