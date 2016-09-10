@@ -8,11 +8,8 @@
     "url": "https://github.com/uqee/mkt-optionpnl-local.git"
   },
   "scripts": {
-    "start": "node app.js",
-    "server.start": "foreman run --env .env node app.js",
-    "server.start:bg": "npm run-script server.start >.stdout 2>.stderr &",
-    "server.stop": "pkill -f 'node app.js'",
-    "server.debug": "foreman run --env .env nodemon --debug app.js"
+    "start": "node index.js",
+    "dev": "nodemon --debug index.js"
   },
   "dependencies": {
     "async": "^1.5.2",
