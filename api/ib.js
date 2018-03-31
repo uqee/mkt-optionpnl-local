@@ -132,7 +132,7 @@ var ib = new (require('ib'))({
 
     function reqMktData (contract, snapshot, id) {
       log.print(log.LVL_XXL, 'ib', '_reqMktData', '(' + id + ', ' + JSON.stringify(contract) + ', ' + snapshot + ')');
-      ib.reqMktData(id, contract, '', snapshot);
+      ib.reqMktData(id, contract, '', snapshot, false);
     }
 
     function cancelMktData (id) {
